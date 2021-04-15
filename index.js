@@ -37,13 +37,33 @@ mongoose.connect(url, connectionOptions).then(
     }
 )
 
+//use it later for faster implementation of the insert
+
+const Schema = mongoose.Schema
+const ItemScheema = new Schema({
+    item: String, 
+    rarity: String, 
+    description: String, 
+    gold_per_turn: Number
+})
+
+const Item = mongoose.model("current_items", ItemScheema)
+/*
+const i1 = Item({item:"Cat", rarity: "common", description: "", gold_per_turn: 1})
+i1.save().then(
+    () => {
+        console.log("Insert Was Successfull")
+    }
+).catch(
+    (err) => {
+        console.log(err)
+    }
+)
+*/
 
 const express = require("express");
 const app = express();
 
-// I dont know why but it does not work without these lines :cccc
-app.use(express.json());
-app.use(express.urlencoded());
 
 const HTTP_PORT = process.env.PORT || 8080;
 const onHttpStart = () => {
@@ -56,8 +76,16 @@ app.get("/", (req, res)=> {
     res.send("suck my ass!")
 });
 
-app.get("/api/movies", (req,res)=> {
-    res.send(upcomingMovies)
+app.get("/api/items", (req,res)=> {
+    Item.find({}).exec().then(
+        (msg) => {
+        res.send(msg);
+        }
+    ).catch(
+        (err) => {
+            console.log(err);
+        }
+    );
 });
 
 app.get("/api/movies/:id", (req, res)=> {
