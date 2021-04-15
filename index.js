@@ -1,28 +1,9 @@
-let upcomingMovies = [
-    {
-        "id": 0,
-        "name": "Mortal Komabat", 
-        "description": "Mortal Kombat between Sub-Zero and Scorpion"
-    }, 
-    {
-        "id": 1, 
-        "name": "Sudan", 
-        "description": "Hahaha there is no description"
-    },
-    {
-        "id": 2, 
-        "name": "Meow", 
-        "description": "Lera is cute"
-    },
-    {
-        "id": 3, 
-        "name": "Vlad", 
-        "description": "Vlad is being stupid sometimes"
-    }
-]
-
 //import all necessary variable for database connection
 const mongoose = require("mongoose");
+//import express 
+const express = require("express");
+const bodyParser = require('body-parser');
+
 const url = "mongodb+srv://vm1702:3989302As@cluster0.ljnio.mongodb.net/a-4db?retryWrites=true&w=majority";
 const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 
@@ -37,8 +18,6 @@ mongoose.connect(url, connectionOptions).then(
     }
 )
 
-//use it later for faster implementation of the insert
-
 const Schema = mongoose.Schema
 const ItemScheema = new Schema({
     item: String, 
@@ -48,33 +27,18 @@ const ItemScheema = new Schema({
 })
 
 const Item = mongoose.model("current_items", ItemScheema)
-/*
-const i1 = Item({item:"Cat", rarity: "common", description: "", gold_per_turn: 1})
-i1.save().then(
-    () => {
-        console.log("Insert Was Successfull")
-    }
-).catch(
-    (err) => {
-        console.log(err)
-    }
-)
-*/
 
-const express = require("express");
 const app = express();
-
+//For some reason we need to import body parser manually so that req.body would work
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 const HTTP_PORT = process.env.PORT || 8080;
 const onHttpStart = () => {
     console.log(`Server runs on ${HTTP_PORT}`);
 }
+
 app.listen(HTTP_PORT, onHttpStart);
-
-
-app.get("/", (req, res)=> {
-    res.send("suck my ass!")
-});
 
 app.get("/api/items", (req,res)=> {
     Item.find({}).exec().then(
@@ -88,47 +52,68 @@ app.get("/api/items", (req,res)=> {
     );
 });
 
-app.get("/api/movies/:id", (req, res)=> {
-    const movieId = parseInt(req.params.id);
+app.get("/api/items/:item_name", (req, res)=> {
+    const item_name = req.params.item_name;
+    console.log(item_name);
 
-    for(let i = 0; i < upcomingMovies.length; i++){
-        if(upcomingMovies[i].id === movieId){
-            return res.send(upcomingMovies[i]);
-            break;
+    Item.find({item: item_name}).then(
+        (result) => {
+            if(result.length === 0){
+                res.status(404).send("Sorry item was not found :(")
+            }else{
+                res.send(result);
+            }
         }
-    }
-    res.status(404).send("sorry!");
+    ).catch(
+        (err) => {
+            console.log(err);
+        }
+    )
 });
 
-// app.get("/api/items/:item_name", (req, res)=> {
-//     const item_name = req.params.item_name;
-//     console.log(item_name);
+app.post("/api/items", (req, res)=> {
+    if(req.body.item === "" || req.body.description === ""){
+        res.status(400).send("please check if name and description are not empty >:|")
+    }else{
+        const newItem = Item(
+            {item: req.body.item, 
+            rarity: req.body.rarity, 
+            description: req.body.description, 
+            gold_per_turn: req.body.gold_per_turn})
 
-//     Item.find({item: item_name}).then(
-//         (result) => {
-//             if(result.length === 0){
-//                 res.status(404).send("Sorry item was not found :(")
-//             }else{
-//                 res.send(result);
-//             }
-//         }
-//     ).catch(
-//         (err) => {
-//             console.log(err);
-//         }
-//     )
-// });
-
-app.post("/api/movies", (req, res)=> {
-    console.log(req.body);
-
-    for(let i = 0; i < upcomingMovies.length; i++){
-        if(req.body.id == upcomingMovies[i]){
-            res.status(400).send("get the hell out of here!!!!")
-        }
+        newItem.save().then(
+            () => {
+                console.log("Insert Was Successfull")
+                res.status(200).send("Insert Was Successful")
+            }).catch(
+            (err) => {
+                console.log(err)
+            })
     }
-    
-    upcomingMovies.push(req.body);
-    res.send("fuck off");
 });
 
+app.delete("/api/items/:item_name", (req, res)=> {
+    const item_name = req.params.item_name;
+    console.log(item_name);
+
+    Item.deleteOne({item: item_name}).then(
+        (result) => {
+            if(result.length === 0){
+                res.status(404).send("Sorry item was not found :(")
+            }else{
+                res.send("Delete was complete")
+            }
+        }
+    ).catch(
+        (err) => {
+            console.log(err);
+        }
+    )
+});
+
+app.put("/api/items/:_id", (req, res)=> {
+    const id = req.params._id;
+    console.log(id);
+
+    res.status(501).send("sorry this feature is not implemented yet :C")
+});
