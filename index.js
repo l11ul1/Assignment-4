@@ -100,6 +100,25 @@ app.get("/api/movies/:id", (req, res)=> {
     res.status(404).send("sorry!");
 });
 
+// app.get("/api/items/:item_name", (req, res)=> {
+//     const item_name = req.params.item_name;
+//     console.log(item_name);
+
+//     Item.find({item: item_name}).then(
+//         (result) => {
+//             if(result.length === 0){
+//                 res.status(404).send("Sorry item was not found :(")
+//             }else{
+//                 res.send(result);
+//             }
+//         }
+//     ).catch(
+//         (err) => {
+//             console.log(err);
+//         }
+//     )
+// });
+
 app.post("/api/movies", (req, res)=> {
     console.log(req.body);
 
