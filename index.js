@@ -41,7 +41,7 @@ const onHttpStart = () => {
 app.listen(HTTP_PORT, onHttpStart);
 
 app.get("/", (req,res)=> {
-    res.send("<a>/api/items</a>");
+    res.send("<h1>Assignment-4 can be found by the next link: https://a4-munv.herokuapp.com/api/items</h1>");
 });
 
 app.get("/api/items", (req,res)=> {
