@@ -40,6 +40,10 @@ const onHttpStart = () => {
 
 app.listen(HTTP_PORT, onHttpStart);
 
+app.get("/", (req,res)=> {
+    res.send("<a>/api/items</a>");
+});
+
 app.get("/api/items", (req,res)=> {
     Item.find({}).exec().then(
         (msg) => {
